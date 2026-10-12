@@ -1,0 +1,10 @@
+# Development & scratch directories
+frames/
+reference video/
+__pycache__/
+*.pyc
+
+# System / editor files
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Wedding invitation link preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FAEDED"/><stop offset="1" stop-color="#EFD6DA"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F0DCA8"/><stop offset=".5" stop-color="#D8B26A"/><stop offset="1" stop-color="#B8934C"/>
+    </linearGradient>
+    <radialGradient id="wash" cx=".5" cy=".4" r=".6">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".6"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="50"/></filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g filter="url(#soft)" opacity=".5">
+    <ellipse cx="300" cy="200" rx="260" ry="150" fill="#FFFFFF" opacity=".5"/>
+    <ellipse cx="900" cy="450" rx="280" ry="160" fill="#FFFFFF" opacity=".4"/>
+  </g>
+  <rect width="1200" height="630" fill="url(#wash)"/>
+  <rect x="34" y="34" width="1132" height="562" fill="none" stroke="#7E5F6C" stroke-opacity=".32" stroke-width="1.4"/>
+  <rect x="46" y="46" width="1108" height="538" fill="none" stroke="url(#gold)" stroke-opacity=".75" stroke-width="1.2"/>
+  <g transform="translate(600 268)">
+    <circle r="86" fill="#FFFFFF" fill-opacity=".6"/>
+    <circle r="86" fill="none" stroke="url(#gold)" stroke-width="2.4"/>
+    <circle r="76" fill="none" stroke="#B8934C" stroke-opacity=".6" stroke-width="1"/>
+    <text x="0" y="30" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-style="italic" fill="#4A3A45" fill-opacity=".88">L &amp; P</text>
+  </g>
+  <text x="600" y="472" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="27" letter-spacing="16" fill="#4A3A45" fill-opacity=".82">WE ARE GETTING MARRIED</text>
+  <text x="600" y="524" text-anchor="middle" font-family="Georgia, serif" font-size="25" font-style="italic" fill="#4A3A45" fill-opacity=".68">12 June 2027 &#183; The Garden Conservatory</text>
+</svg>

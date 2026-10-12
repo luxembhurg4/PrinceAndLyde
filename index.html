@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3C9CF">
+<title>Lyde &amp; Prince — We're Getting Married</title>
+<meta name="description" content="Together with their families, Lyde & Prince request the pleasure of your company. Tap the seal to open the invitation.">
+<link rel="icon" href="assets/og-image.svg" type="image/svg+xml">
+
+<!-- Open Graph / share preview (see README to make a .jpg version) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lyde &amp; Prince — We're Getting Married">
+<meta property="og:description" content="Together with their families, Lyde &amp; Prince request the pleasure of your company. Tap the seal to open the invitation.">
+<meta property="og:image" content="assets/og-image.svg">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Fonts: Parisienne (script) + Cormorant Garamond (high-contrast serif) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Parisienne&display=swap" rel="stylesheet">
+
+<link rel="preload" as="image" href="assets/envelope-texture.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/wax-seal.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/bg-sky.webp" fetchpriority="low">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- No-JS fallback: skip the envelope and show the invitation -->
+<noscript><style>#intro{display:none!important}body{overflow:auto!important}.reveal,.parallax{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+
+<body class="is-locked">
+
+<!-- ===========================================================================
+     SHARED SVG DEFINITIONS — decorative artwork used across the site
+     ======================================================================== -->
+<!-- Shared defs: hairline divider only. All scenery is raster art in /assets. -->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- hairline ornamental divider -->
+    <symbol id="sym-divider" viewBox="0 0 240 20">
+      <path d="M0 10h96M144 10h96" stroke="currentColor" stroke-width=".7" opacity=".7"/>
+      <path d="M120 3.5l6.5 6.5-6.5 6.5-6.5-6.5z" fill="currentColor" opacity=".85"/>
+      <circle cx="103" cy="10" r="1.5" fill="currentColor" opacity=".6"/>
+      <circle cx="137" cy="10" r="1.5" fill="currentColor" opacity=".6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ===========================================================================
+     1 · THE ENVELOPE INTRO  (fixed overlay, removed after the opening)
+     ======================================================================== -->
+<div class="intro" id="intro">
+  <div class="intro__stage">
+
+    <!-- interior bouquet revealed once the flap lifts (raster art) -->
+    <div class="env__peek" id="envPeek">
+      <img class="env__peek-img" src="assets/arch-floral.webp" alt="" aria-hidden="true" decoding="async">
+    </div>
+
+    <!-- envelope back sheet -->
+    <div class="env__back" id="envBack"></div>
+
+    <!-- envelope front / pocket -->
+    <div class="env__front" id="envFront">
+      <img class="env__cornerimg env__cornerimg--tl" src="assets/florals-corner-tl.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+      <img class="env__cornerimg env__cornerimg--br" src="assets/florals-corner-br.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+    </div>
+
+    <!-- flap -->
+    <div class="env__flap" id="envFlap"></div>
+
+    <!-- ribbon + bow -->
+    <div class="env__ribbon" id="envRibbon">
+      <span class="env__band"></span>
+      <img class="env__bow-img" src="assets/ribbon-bow.webp" alt="" aria-hidden="true" decoding="async">
+    </div>
+
+    <!-- wax seal -->
+    <button class="seal" id="sealBtn" type="button" aria-label="Open the invitation">
+      <span class="seal__glow" aria-hidden="true"></span>
+      <img class="seal__img" src="assets/wax-seal.webp" alt="" aria-hidden="true" decoding="async">
+      <span class="seal__mono" id="sealMono" aria-hidden="true">L<span class="seal__amp">&amp;</span>P</span>
+    </button>
+
+    <p class="env__script">Request the pleasure<br>of your company</p>
+    <p class="env__hint" id="tapHint"><span>Tap the seal to open</span></p>
+  </div>
+
+  <button class="intro__skip" id="skipIntro" type="button">Skip</button>
+</div>
+
+<!-- floating petals -->
+<canvas class="petals" id="petals" aria-hidden="true"></canvas>
+
+<!-- persistent sound toggle -->
+<button class="music" id="musicBtn" type="button" aria-pressed="false" aria-label="Play music">
+  <svg class="music__icon" viewBox="0 0 24 24" aria-hidden="true">
+    <g class="music__notes">
+      <circle cx="9" cy="17.5" r="3"/><path d="M12 17.5V5l7-2v11"/><circle cx="16" cy="14.5" r="3"/>
+    </g>
+    <g class="music__wave">
+      <path d="M7 9c-2 3-2 6 0 9M12 7c-3.4 4.4-3.4 9.6 0 14M17 9c-2 3-2 6 0 9"/>
+    </g>
+    <path class="music__off" d="M4 4l16 16"/>
+  </svg>
+  <span class="music__label" id="musicLabel">Music</span>
+</button>
+
+<!-- ===========================================================================
+     MAIN DOCUMENT
+     ======================================================================== -->
+<main id="page">
+
+  <!-- 2 + 3 · GARDEN SCENE AND THE INVITATION CARD ========================= -->
+  <div class="opening" id="opening">
+
+    <!-- the painterly garden scene (parallax layers) -->
+    <div class="scene" id="scene" aria-hidden="true">
+      <div class="scene__inner" id="sceneInner">
+
+        <!-- LAYER 1 · watercolor sky (raster) -->
+        <div class="lyr lyr--sky" data-speed="2" data-depth="1">
+          <img class="lyr__img" src="assets/bg-sky.webp" alt="" aria-hidden="true" decoding="async" fetchpriority="low">
+        </div>
+
+        <!-- LAYER 2 · hazy hills + mist (raster, softly blurred for depth) -->
+        <div class="lyr lyr--hills" data-speed="6" data-depth="2">
+          <img class="lyr__img" src="assets/bg-hills.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="lyr__mist" aria-hidden="true"></div>
+        </div>
+
+        <!-- LAYER 3 · painterly cypress allées (raster) -->
+        <div class="lyr lyr--trees" data-speed="12" data-depth="3">
+          <img class="lyr__tree lyr__tree--l" src="assets/trees-cypress-left.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <img class="lyr__tree lyr__tree--r" src="assets/trees-cypress-right.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        </div>
+
+        <!-- LAYER 4 · floral arch with light (raster) + foil monogram -->
+        <div class="lyr lyr--arch" data-speed="18" data-depth="4">
+          <div class="arch__glow" aria-hidden="true"></div>
+          <div class="arch__rays" aria-hidden="true"></div>
+          <img class="arch__img" src="assets/arch-floral.webp" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="low">
+          <div class="mono foil" aria-hidden="true">
+            <img class="mono__img" src="assets/monogram-gold.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            <span class="mono__live"><span id="monoA">L</span><span id="monoJoin">&amp;</span><span id="monoB">P</span></span>
+          </div>
+        </div>
+
+        <!-- LAYER 5 · foreground watercolor florals (raster, sharpest layer) -->
+        <div class="lyr lyr--fore" data-speed="30" data-depth="5">
+          <img class="fore__img fore__img--bl" src="assets/florals-corner-bl.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <img class="fore__img fore__img--br" src="assets/florals-corner-br.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        </div>
+      </div>
+
+      <div class="scene__vignette" aria-hidden="true"></div>
+      <div class="scene__grain" aria-hidden="true"></div>
+
+      <!-- fabric panels that part like curtains -->
+      <div class="curtain curtain--l" id="curtainL"></div>
+      <div class="curtain curtain--r" id="curtainR"></div>
+
+      <a class="scene__cue" href="#invitation" id="sceneCue">
+        <span class="caps">Scroll</span>
+        <svg viewBox="0 0 24 40" aria-hidden="true"><path d="M12 4v28M5 25l7 8 7-8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </a>
+    </div>
+
+    <!-- the scene "breathing" moment with the personalised greeting -->
+    <section class="panel panel--reveal" id="reveal">
+      <p class="caps reveal__kicker" id="greetingKicker">A wedding invitation</p>
+      <p class="script reveal__hello" id="greeting">Dear Guest</p>
+    </section>
+
+    <!-- the invitation card itself -->
+    <section class="panel panel--card" id="invitation">
+      <article class="card paper reveal">
+        <img class="card__cornerimg card__cornerimg--tl" src="assets/florals-corner-tl.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        <img class="card__cornerimg card__cornerimg--tr" src="assets/florals-corner-tr.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        <img class="card__cornerimg card__cornerimg--bl" src="assets/florals-corner-bl.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        <img class="card__cornerimg card__cornerimg--br" src="assets/florals-corner-br.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+
+        <p class="caps card__kicker" data-f="parentsLabel">together with their families</p>
+
+        <h1 class="card__names script">
+          <span data-f="partner1">Lyde</span>
+          <span class="card__amp">&amp;</span>
+          <span data-f="partner2">Prince</span>
+        </h1>
+
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+
+        <p class="card__wording">We request the pleasure of your company<br>to celebrate our wedding on</p>
+
+        <div class="datebox">
+          <p class="caps" data-f="weekday">Saturday</p>
+          <p class="datebox__day" data-f="day">12</p>
+          <p class="caps" data-f="monthYear">June 2027</p>
+        </div>
+
+        <p class="card__time" data-f="timeLabel">at four o'clock in the afternoon</p>
+
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+
+        <p class="card__venue">
+          <span class="script card__venue-name" data-f="ceremonyName">The Garden Conservatory</span>
+          <span class="card__venue-addr" data-f="ceremonyAddr">12 Rosewood Lane, San Isidro</span>
+        </p>
+
+        <p class="parents" id="parentsList"></p>
+      </article>
+    </section>
+  </div>
+
+  <!-- 4 · COUNTDOWN ======================================================== -->
+  <section class="section section--countdown" id="countdown">
+    <div class="wrap">
+      <header class="head reveal">
+        <p class="caps">Save the date</p>
+        <h2 class="script head__title">Until we say I do</h2>
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+      </header>
+
+      <div class="countdown reveal" id="countdownGrid" role="timer" aria-live="off">
+        <div class="cd"><span class="cd__num" id="cdDays">00</span><span class="caps cd__lab">Days</span></div>
+        <div class="cd"><span class="cd__num" id="cdHours">00</span><span class="caps cd__lab">Hours</span></div>
+        <div class="cd"><span class="cd__num" id="cdMins">00</span><span class="caps cd__lab">Minutes</span></div>
+        <div class="cd"><span class="cd__num" id="cdSecs">00</span><span class="caps cd__lab">Seconds</span></div>
+      </div>
+
+      <p class="muted reveal" data-f="dateLine">Saturday, 12 June 2027 · The Garden Conservatory</p>
+
+      <div class="btnrow reveal">
+        <button class="btn" id="calIcs" type="button">Add to calendar</button>
+        <a class="btn btn--ghost" id="calGoogle" href="#" target="_blank" rel="noopener">Google Calendar</a>
+        <button class="btn btn--ghost" id="shareBtn" type="button">Share</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · VENUE =========================================================== -->
+  <section class="section section--venue" id="venue">
+    <div class="wrap">
+      <figure class="venue__art reveal">
+        <img src="assets/venue-conservatory.webp" alt="Watercolor conservatory illustration at the garden venue" loading="lazy" decoding="async" width="1000" height="800">
+      </figure>
+
+      <header class="head reveal">
+        <h2 class="script head__title">The Venue</h2>
+        <p class="muted">Both moments happen a short stroll apart in the same garden estate.</p>
+      </header>
+
+      <div class="venues">
+        <article class="venue paper reveal">
+          <p class="caps venue__label" data-f="ceremonyLabel">Ceremony</p>
+          <h3 class="venue__name" data-f="ceremonyName">The Garden Conservatory</h3>
+          <p class="muted" data-f="ceremonyAddr">12 Rosewood Lane, San Isidro</p>
+          <a class="link" id="dirCeremony" href="#" target="_blank" rel="noopener">Get directions</a>
+        </article>
+
+        <article class="venue paper reveal">
+          <p class="caps venue__label" data-f="receptionLabel">Reception</p>
+          <h3 class="venue__name" data-f="receptionName">Orchard House Pavilion</h3>
+          <p class="muted" data-f="receptionAddr">88 Cypress Drive, San Isidro</p>
+          <a class="link" id="dirReception" href="#" target="_blank" rel="noopener">Get directions</a>
+        </article>
+      </div>
+
+      <div class="map reveal">
+        <iframe id="mapFrame" class="map__frame" title="Map of the wedding venue" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-src=""></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · PROGRAM ========================================================= -->
+  <section class="section section--program" id="program">
+    <div class="wrap">
+      <header class="head reveal">
+        <p class="caps">Order of the day</p>
+        <h2 class="script head__title">Programme</h2>
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+      </header>
+      <ol class="timeline" id="timeline"></ol>
+    </div>
+  </section>
+
+  <!-- 7 · DRESS CODE ====================================================== -->
+  <section class="section section--dress" id="dress">
+    <div class="wrap">
+      <header class="head reveal">
+        <p class="caps">What to wear</p>
+        <h2 class="script head__title" data-f="dressTitle">Garden Formal</h2>
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+      </header>
+      <p class="dress__attire reveal" data-f="dressAttire">Linen suits, midi or long dresses</p>
+      <p class="muted reveal" data-f="dressNote">Kindly choose from our palette.</p>
+      <ul class="swatches reveal" id="swatches"></ul>
+    </div>
+  </section>
+
+  <!-- 8 · GALLERY ========================================================= -->
+  <section class="section section--gallery" id="gallery">
+    <div class="wrap">
+      <header class="head reveal">
+        <p class="caps">A few favourites</p>
+        <h2 class="script head__title">Our Story</h2>
+      </header>
+    </div>
+    <div class="gal reveal">
+      <ul class="gal__track" id="galTrack"></ul>
+      <div class="gal__nav">
+        <button class="gal__arrow" id="galPrev" type="button" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        <div class="gal__dots" id="galDots"></div>
+        <button class="gal__arrow" id="galNext" type="button" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · RSVP ============================================================ -->
+  <section class="section section--rsvp" id="rsvp">
+    <div class="wrap">
+      <header class="head reveal">
+        <p class="caps">Will you join us?</p>
+        <h2 class="script head__title">Kindly Respond</h2>
+        <p class="muted" id="rsvpDeadline">Kindly reply by 12 May 2027</p>
+      </header>
+
+      <form class="form paper reveal" id="rsvpForm" novalidate>
+        <p class="form__hello script" id="rsvpHello" hidden></p>
+
+        <label class="field">
+          <span class="caps field__lab">Your name</span>
+          <input type="text" name="name" id="fName" autocomplete="name" required placeholder="e.g. Santos Family">
+        </label>
+
+        <fieldset class="field field--radios">
+          <legend class="caps field__lab">Will you be able to join us?</legend>
+          <div class="radios">
+            <label class="radio"><input type="radio" name="attending" value="Yes, joyfully" required><span>Yes, joyfully</span></label>
+            <label class="radio"><input type="radio" name="attending" value="Regretfully not"><span>Regretfully not</span></label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="caps field__lab">Number of guests</span>
+          <input type="number" name="guests" id="fGuests" min="1" max="5" value="1" inputmode="numeric">
+        </label>
+
+        <label class="field" id="mealField">
+          <span class="caps field__lab">Meal choice</span>
+          <select name="meal" id="fMeal"></select>
+        </label>
+
+        <label class="field">
+          <span class="caps field__lab">A message for us <span class="field__opt">(optional)</span></span>
+          <textarea name="message" id="fMessage" rows="3" placeholder="Share a wish, a song request, or your diet notes…"></textarea>
+        </label>
+
+        <p class="form__error" id="formError" role="alert" hidden></p>
+        <button class="btn btn--solid" type="submit">Send response</button>
+        <p class="muted form__alt">Prefer email? <a class="link" id="mailtoLink" href="#">Write to us instead</a></p>
+      </form>
+
+      <div class="thanks paper" id="rsvpSuccess" hidden>
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+        <h3 class="script thanks__title">Thank you</h3>
+        <p id="thanksText">Your response has been received. We cannot wait to celebrate with you.</p>
+        <button class="btn btn--ghost" id="rsvpAgain" type="button">Send another response</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · GIFTS ========================================================== -->
+  <section class="section section--gift" id="gifts">
+    <div class="wrap">
+      <article class="gift paper reveal">
+        <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+        <h2 class="script head__title" data-f="giftTitle">With love, no gifts needed</h2>
+        <p class="muted" data-f="giftText">Your presence is the loveliest present of all.</p>
+        <a class="btn btn--ghost" id="giftLink" href="#" target="_blank" rel="noopener" hidden>View our registry</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- 11 · CLOSING ======================================================== -->
+  <footer class="section section--closing" id="closing">
+    <div class="curtain-flourish reveal" aria-hidden="true">
+      <img class="curtain-flourish__img" src="assets/florals-corner-tl.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+      <svg class="orn ornament" viewBox="0 0 240 20" aria-hidden="true"><use href="#sym-divider" width="240" height="20"/></svg>
+      <img class="curtain-flourish__img curtain-flourish__img--r" src="assets/florals-corner-tr.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+    </div>
+
+    <div class="wrap">
+      <p class="script closing__names" data-f="coupleNames">Lyde &amp; Prince</p>
+      <p class="muted">Thank you for being part of our story —<br>we cannot wait to celebrate with you.</p>
+      <p class="caps closing__date" data-f="dateLine">Saturday, 12 June 2027 · The Garden Conservatory</p>
+      <p class="hashtag" data-f="hashtag">#LydeAndPrince</p>
+      <p class="muted closing__credit">Made with love · Tap the music note for a little ambiance</p>
+    </div>
+  </footer>
+</main>
+
+<!-- gallery lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
+  <button class="lightbox__close" id="lbClose" type="button" aria-label="Close photo viewer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <button class="lightbox__arrow lightbox__arrow--l" id="lbPrev" type="button" aria-label="Previous photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  <figure class="lightbox__fig">
+    <img id="lbImg" src="" alt="">
+    <figcaption class="lightbox__cap" id="lbCap"></figcaption>
+  </figure>
+  <button class="lightbox__arrow lightbox__arrow--r" id="lbNext" type="button" aria-label="Next photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+</div>
+
+<audio id="musicAudio" preload="none" loop></audio>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
