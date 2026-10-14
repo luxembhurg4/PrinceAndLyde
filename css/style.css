@@ -240,8 +240,13 @@ body.is-entering .stage{ translate:0 100svh; }
   left:calc(60 * var(--u)); width:calc(270 * var(--u));
   font-family:var(--script); font-size:calc(56 * var(--u)); line-height:normal;
 }
-.bow__name--1{ top:calc(147 * var(--u)); }
-.bow__name--2{ top:calc(267 * var(--u)); }
+/* names stacked tight around a small ampersand (Figma spaced them 120 px apart) */
+.bow__name--1{ top:calc(140 * var(--u)); }
+.bow__amp{
+  top:calc(194 * var(--u)); left:0; width:100%;
+  font-family:var(--script); font-size:calc(40 * var(--u)); line-height:1;
+}
+.bow__name--2{ top:calc(218 * var(--u)); }
 /* wedding rings where the Figma bow sat, centred on the gate */
 .bow__rings{
   top:calc(350 * var(--u)); left:calc(85 * var(--u)); width:calc(220 * var(--u)); height:auto;
