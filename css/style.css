@@ -66,9 +66,10 @@ p,h1,h2,h3{ margin:0; font-weight:400; }
 .intro{
   position:fixed; inset:0; z-index:100; overflow:hidden;
   background:var(--c-page) url("../assets/fig-paper.webp") center/cover;
-  transition:translate 1.6s var(--ease-slide);
+  transition:opacity .8s ease-in-out;
 }
-.intro.is-leaving{ translate:0 -100%; }
+/* last step: the grown gate card dissolves into the identical bow-screen gate below */
+.intro.is-leaving{ opacity:0; pointer-events:none; }
 .intro.is-gone{ display:none; }
 
 /* the 390 × 780 design box, fitted to the screen and anchored to the top */
@@ -134,6 +135,24 @@ p,h1,h2,h3{ margin:0; font-weight:400; }
 .intro.is-open :is(.env__lining,.env__lining-edge,.env__pocket,.env__flap-folded,.seal--lifted){
   opacity:1; translate:0 0;
 }
+
+/* second half: the pocket hinges open downward like the flap did, the folded flap
+   and seal fold away, and the gate card grows to fill the screen */
+.env__pocket{ transform-origin:50% 100%; -webkit-backface-visibility:hidden; backface-visibility:hidden; }
+.intro.is-unfolding .env__pocket{ animation:pocketOpen 1.4s linear both; }
+@keyframes pocketOpen{
+  0%  { transform:perspective(calc(1600 * var(--u))) rotateX(0deg);    filter:brightness(1);   animation-timing-function:cubic-bezier(.45,0,.4,1); }
+  75% { transform:perspective(calc(1600 * var(--u))) rotateX(-92deg);  filter:brightness(.86); animation-timing-function:ease-out; }
+  100%{ transform:perspective(calc(1600 * var(--u))) rotateX(-180deg); filter:brightness(.86); }
+}
+.intro.is-open.is-unfolding :is(.env__flap-folded,.seal--lifted,.env__lining-edge,.env__script){
+  opacity:0; transition:opacity .45s ease-in-out; animation:none;
+}
+.intro.is-unfolding .env__lining{
+  top:0; height:calc(780 * var(--u));
+  transition:top 1.2s var(--ease-out) .55s, height 1.2s var(--ease-out) .55s;
+}
+.intro.is-unfolding .env__lining img{ height:100%; transition:height 1.2s var(--ease-out) .55s; }
 
 /* wax seal — vector layers + live monogram */
 .seal{
@@ -206,9 +225,8 @@ main{
 .screen > *{ position:absolute; }
 
 /* bow reveal + invitation hero share one pinned backdrop; only the words scroll.
-   The stage rises with the envelope's slide, then the gate crossfades to the arch. */
-.stage{ position:relative; transition:translate 1.6s var(--ease-slide); }
-body.is-entering .stage{ translate:0 100svh; }
+   The envelope's gate card dissolves into it, then the gate crossfades to the arch. */
+.stage{ position:relative; }
 .stage__bg{ position:sticky; top:0; overflow:hidden; height:calc(780 * var(--u)); }
 /* overlap via the screen, not a negative margin on the art (that would never un-stick) */
 .stage__bg + .screen{ margin-top:calc(-780 * var(--u)); }
@@ -499,6 +517,30 @@ body.is-entering .stage{ translate:0 100svh; }
 .music[aria-pressed="true"]::after{ opacity:0; }
 body.is-ready .music{ opacity:1; pointer-events:auto; }
 
+/* petal trail left by a finger or cursor (js/app.js → petal trail).
+   Sprite: 12 frames of 128 px — 0–7 loose petals, 8–11 rosebuds. */
+.trail{
+  position:fixed; z-index:110; left:0; top:0; pointer-events:none;
+  width:var(--s); height:var(--s);
+  background:url("../assets/petal-trail.webp") 0 0 / 1200% 100% no-repeat;
+  background-position-x:calc(var(--f) * 100% / 11);
+  will-change:transform, opacity;
+  animation:petalFly var(--life) cubic-bezier(.2,.6,.35,1) forwards;
+}
+@keyframes petalFly{
+  0%  { opacity:0;
+        transform:translate(-50%,-50%) perspective(300px) rotate(var(--a)) scale(.35); }
+  10% { opacity:1; }
+  40% { transform:translate(calc(-50% + var(--dx) * .7), calc(-50% + var(--dy)))
+                  perspective(300px) rotate(calc(var(--a) + var(--rz) * .4))
+                  rotateX(calc(var(--rx) * .4)) rotateY(calc(var(--ry) * .4)) scale(1); }
+  75% { opacity:.9; }
+  100%{ opacity:0;
+        transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + var(--fall)))
+                  perspective(300px) rotate(calc(var(--a) + var(--rz)))
+                  rotateX(var(--rx)) rotateY(var(--ry)) scale(.85); }
+}
+
 /* ---------------------------------------------------------------------------
    6 · REDUCED MOTION
    -------------------------------------------------------------------------- */
@@ -509,5 +551,5 @@ body.is-ready .music{ opacity:1; pointer-events:auto; }
     transition-duration:.2s!important; transition-delay:0s!important;
   }
   .reveal,.bow__fade{ opacity:1; translate:none; }
-  .petals{ display:none; }
+  .petals,.trail{ display:none; }
 }

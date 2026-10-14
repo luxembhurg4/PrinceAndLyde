@@ -161,18 +161,18 @@
 
   /* =========================================================================
      3 · ENVELOPE INTRO  (timings follow the Figma "Continuous motion" frame)
-     tap → seal pressed → flap hinges open, lining + pocket rise → envelope
-     slides up while the bow screen rises → bow words fade in one by one
+     tap → seal pressed → flap hinges open, lining + pocket rise → pocket hinges
+     open downward, gate card grows to full screen → dissolves into the bow
+     screen → bow words fade in one by one
      ====================================================================== */
   const intro = $("#intro");
   const bow = $("#reveal");
   const stage = $("#stage");
   const sealBtn = $("#sealBtn");
-  const OPEN = 250, LEAVE = OPEN + 3900, DONE = LEAVE + 1600;
+  const OPEN = 250, UNFOLD = OPEN + 3000, LEAVE = UNFOLD + 1800, DONE = LEAVE + 800;
   let opened = false;
   let timers = [];
 
-  document.body.classList.add("is-entering");   // bow screen waits below the envelope
   /* decode the hidden layers now so the first frame of the opening isn't blank */
   $$("#intro img, .stage__art").forEach((img) => img.decode && img.decode().catch(() => {}));
 
@@ -199,22 +199,17 @@
       return;
     }
     timers.push(setTimeout(() => intro.classList.add("is-open"), OPEN));
-    timers.push(setTimeout(() => {
-      intro.classList.add("is-leaving");
-      document.body.classList.remove("is-entering");
-    }, LEAVE));
-    timers.push(setTimeout(() => bow.classList.add("is-shown"), LEAVE + 1100));
+    timers.push(setTimeout(() => intro.classList.add("is-unfolding"), UNFOLD));
+    timers.push(setTimeout(() => intro.classList.add("is-leaving"), LEAVE));
+    timers.push(setTimeout(() => bow.classList.add("is-shown"), LEAVE + 300));
     timers.push(setTimeout(afterIntro, DONE));
   }
 
   function skipIntro() {
     timers.forEach(clearTimeout);
     timers = [];
-    stage.style.transition = "none";
-    document.body.classList.remove("is-entering");
     bow.classList.add("is-shown");
     afterIntro();
-    requestAnimationFrame(() => (stage.style.transition = ""));
   }
 
   function blockScroll(e) {
@@ -621,6 +616,94 @@
     const count = window.innerWidth < 640 ? 14 : 24;
     petals = Array.from({ length: count }, () => make(true));
     requestAnimationFrame(draw);
+  }
+
+  /* =========================================================================
+     11 · PETAL TRAIL  — reacts to how much the guest touches:
+     faster / longer strokes lay more buds and throw more petals further,
+     a firmer press (touch force / pen pressure) adds more, taps burst.
+     ====================================================================== */
+  if (!reduced) {
+    const MAX_LIVE = 100;
+    let live = 0, last = null, carry = 0;
+    const rand = (a, b) => a + Math.random() * (b - a);
+
+    function spawn(x, y, o) {
+      if (live >= MAX_LIVE) return;
+      live++;
+      const el = document.createElement("span");
+      el.className = "trail";
+      el.style.cssText =
+        `left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;--s:${o.size.toFixed(1)}px;--f:${o.frame};` +
+        `--a:${o.angle | 0}deg;--dx:${o.dx.toFixed(1)}px;--dy:${o.dy.toFixed(1)}px;--fall:${o.fall.toFixed(1)}px;` +
+        `--rz:${o.rz | 0}deg;--rx:${o.rx | 0}deg;--ry:${o.ry | 0}deg;--life:${o.life | 0}ms`;
+      el.addEventListener("animationend", () => { el.remove(); live--; });
+      document.body.append(el);
+    }
+
+    /* a bud resting on the stroke, aligned to its direction */
+    const bud = (x, y, dir, k) => spawn(x + rand(-4, 4), y + rand(-4, 4), {
+      frame: 8 + ((Math.random() * 4) | 0), size: rand(18, 26) * (0.85 + k * 0.15),
+      angle: dir + 90 + rand(-25, 25), dx: rand(-6, 6), dy: rand(-2, 6), fall: rand(10, 24),
+      rz: rand(-30, 30), rx: rand(-20, 20), ry: rand(-20, 20), life: rand(1500, 2100)
+    });
+    /* a loose petal flung off the stroke, tumbling as it falls */
+    const petal = (x, y, dir, k) => {
+      const throwAngle = (dir + (Math.random() < 0.5 ? 90 : -90) + rand(-50, 50)) * Math.PI / 180;
+      const reach = rand(14, 46) * k;
+      spawn(x, y, {
+        frame: (Math.random() * 8) | 0, size: rand(12, 22) * (0.8 + k * 0.2),
+        angle: rand(0, 360), dx: Math.cos(throwAngle) * reach, dy: Math.sin(throwAngle) * reach * 0.6,
+        fall: rand(40, 110), rz: rand(-260, 260), rx: rand(-320, 320), ry: rand(-320, 320),
+        life: rand(1800, 2800)
+      });
+    };
+
+    /* amount of touch: speed of the stroke × pressure (where the device reports it) */
+    function stroke(x, y, t, pressure) {
+      if (!last) { last = { x, y, t }; return; }
+      const dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
+      if (d < 2) return;
+      const speed = d / Math.max(16, t - last.t);                    // px per ms
+      const k = Math.min(2.6, Math.max(0.35, speed / 0.5)) * (0.6 + pressure);
+      const dir = Math.atan2(dy, dx) * 180 / Math.PI;
+      const step = 22 / Math.min(2, k);                              // denser buds when stronger
+      carry += d;
+      while (carry >= step) {                                        // lay buds along the path
+        carry -= step;
+        const f = 1 - carry / d;
+        bud(last.x + dx * f, last.y + dy * f, dir, k);
+      }
+      const loose = Math.round(k * rand(0.6, 1.8));                  // throw petals off it
+      for (let i = 0; i < loose; i++) petal(x, y, dir, k);
+      last = { x, y, t };
+    }
+    function burst(x, y, pressure) {                                 // a tap / press
+      const n = 5 + Math.round(pressure * 8);
+      for (let i = 0; i < n; i++) petal(x, y, rand(0, 360), 0.8 + pressure);
+      bud(x, y, rand(0, 360), 1);
+      last = null; carry = 0;
+    }
+    const force = (p) => (p > 0 && p !== 0.5 ? p : 0.5);              // 0.5 = "unknown" on most devices
+
+    window.addEventListener("touchstart", (e) => {
+      const p = e.touches[0];
+      burst(p.clientX, p.clientY, force(p.force || 0));
+      last = { x: p.clientX, y: p.clientY, t: e.timeStamp };
+    }, { passive: true });
+    window.addEventListener("touchmove", (e) => {
+      const p = e.touches[0];
+      stroke(p.clientX, p.clientY, e.timeStamp, force(p.force || 0));
+    }, { passive: true });
+    window.addEventListener("touchend", () => { last = null; carry = 0; }, { passive: true });
+
+    window.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") burst(e.clientX, e.clientY, force(e.pressure));
+    }, { passive: true });
+    window.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      stroke(e.clientX, e.clientY, e.timeStamp, e.buttons ? force(e.pressure) : 0.25);   // hover is lighter
+    }, { passive: true });
   }
 
   /* pause the audio when the tab is hidden */

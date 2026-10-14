@@ -24,6 +24,7 @@ size** — no code change needed. Keep transparent backgrounds where noted.
 | (inline SVG `#seal-art` in `index.html`) | vector | Wax seal | Poured-wax edge, gloss and pressed initials are SVG filters; the initials are live text from `CONFIG.couple.monogram`. |
 | `couple-silhouette.webp` | 541 × 843 | Dress code, above the motif swatches | **Transparent** mocha silhouette (barong tagalog + baro't saya). AI-generated (Figma). |
 | `fig-volume.svg` | 17 × 17 | Sound button icon | Vector. |
+| `petal-trail.webp` | 1536 × 128 | Touch petal trail | **Transparent** sprite, 12 frames of 128 px: 0–7 loose rose petals, 8–11 rosebuds. AI-generated (Figma), motif tones. |
 | `petals-sprite.webp` | 512 × 128 | Petal/dust particle canvas | **Transparent**, 4 petal variants in a row (each 128 × 128). |
 | `gallery/pic-*.svg` | 900 × 1350 | Gallery placeholders | Replace with your photos (see README). |
 | `og-image.svg` | 1200 × 630 | Share preview | Export to `.jpg` for chat apps (see README). |
@@ -39,13 +40,18 @@ Timings follow the Figma "Continuous motion" frame:
    guest (~1.1 s to upright) and folds back over the top edge; underneath, the gate
    lining and pocket rise into place, then the folded strip and lifted seal settle
    (`cubic-bezier(.22,1,.36,1)`). Each layer's start time is its `--t` in `style.css`.
-3. The envelope slides up while the bow screen rises (1.6 s, `cubic-bezier(.4,0,.2,1)`);
-   the greeting, names and rings fade in one after another.
+3. The pocket hinges open downward the same way (folding past the bottom edge),
+   the gate card grows to fill the screen and dissolves into the bow screen's
+   identical gate; the greeting, names and rings fade in one after another.
 4. Bow screen → invitation: the artwork stays pinned (`.stage__bg`, sticky) while the
    words scroll over it, and the gate crossfades to the arch as the invitation arrives.
 5. Everything below fades up as it scrolls into view (`.reveal`, delay per element via `--d`).
 
-`prefers-reduced-motion`: the envelope opens instantly, no petals, no fades.
+A finger or cursor leaves a petal trail (`.trail`, `js/app.js` → petal trail): rosebuds laid along the
+stroke and loose petals flung off it, tumbling as they fall. Faster/longer strokes and firmer presses
+(where the device reports force) make it denser and wider; a tap bursts petals. Capped at 100 on screen.
+
+`prefers-reduced-motion`: the envelope opens instantly, no petals, no petal trail, no fades.
 
 ## Recolouring new Figma exports
 
