@@ -1,5 +1,5 @@
 /* =============================================================================
-   LYDE & PRINCE — WEDDING INVITATION WEBSITE
+   PRINCE & LYDE — WEDDING INVITATION WEBSITE
    CONFIG  ·  edit THIS file only — every name, date, venue, colour and photo
    used by the site comes from the object below. No other file needs editing.
    Save the file and refresh the page to see your changes.
@@ -10,11 +10,10 @@ const CONFIG = {
      1. THE COUPLE
      --------------------------------------------------------------------------- */
   couple: {
-    partner1: "Lyde",
-    partner2: "Prince",
-    monogram: "LP",        // interlocking initials shown on the wax seal & arch
-    monogramJoiner: "&",   // symbol between the initials, e.g. "&" or ""
-    hashtag: "#LydeAndPrince",
+    partner1: "Prince",
+    partner2: "Lyde",
+    monogram: "PL",        // two initials, drawn overlapping on the wax seal & invitation
+    hashtag: "#PrinceAndLyde",
     // Optional line of parents / sponsors, printed under the names.
     // Leave as an empty array to hide it.
     parents: [
@@ -44,11 +43,11 @@ const CONFIG = {
      --------------------------------------------------------------------------- */
   venues: {
     ceremony: {
-      label: "Ceremony",
-      name: "The Garden Conservatory",
-      address: "12 Rosewood Lane, San Isidro",
-      mapQuery: "The Garden Conservatory, 12 Rosewood Lane",
-      directionsUrl: ""
+      label: "Wedding Ceremony",
+      name: "St. Paul the Apostle Parish Church",
+      address: "Poblacion, Inabanga, Bohol",
+      mapQuery: "St. Paul the Apostle Parish Church, Inabanga, Bohol",
+      directionsUrl: "https://share.google/gmAPAKGHZuhY8Rkxg"
     },
     reception: {
       label: "Reception",
@@ -65,7 +64,7 @@ const CONFIG = {
      4. PROGRAM / SCHEDULE  — add, remove or reorder freely
      --------------------------------------------------------------------------- */
   program: [
-    { time: "4:00",  title: "Ceremony",    note: "Garden arbour, please be seated by 3:45" },
+    { time: "4:00",  title: "Ceremony",    note: "St. Paul the Apostle Parish Church · please be seated by 3:45" },
     { time: "4:45",  title: "Photos",      note: "Golden-hour portraits in the rose garden" },
     { time: "5:30",  title: "Cocktail Hour", note: "Lemonade, sparkling wine & canapés" },
     { time: "7:00",  title: "Dinner & Toasts", note: "Under the string lights" },
@@ -73,20 +72,19 @@ const CONFIG = {
   ],
 
   /* ---------------------------------------------------------------------------
-     5. DRESS CODE & COLOUR PALETTE
-     palette → the swatches shown on the dress-code page (name + hex)
+     5. DRESS CODE & MOTIF  (from reference video/motif.jpg)
+     palette → the swatches on the dress-code page: name, colour, who wears it
      --------------------------------------------------------------------------- */
   dressCode: {
-    title: "Garden Formal",
-    attire: "Linen suits, midi or long dresses, block heels or flats",
-    note: "Kindly choose from our palette below — soft blushes, dusty rose and sage. The lawn is grassy, so stilettos are best avoided.",
+    title: "Filipino Formal",
+    attire: "Barong Tagalog for gentlemen · Filipiniana for ladies",
+    note: "Kindly dress in our motif colours.",
     palette: [
-      { name: "Blush",     hex: "#F3C9CF" },
-      { name: "Dusty Rose", hex: "#C9A3AC" },
-      { name: "Sage",      hex: "#9FB39A" },
-      { name: "Champagne", hex: "#E4C98A" },
-      { name: "Lavender",  hex: "#CDBFE0" },
-      { name: "Ivory",     hex: "#FCF4EF" }
+      { name: "Champagne",     hex: "#F5CAA5", wear: "Bridesmaids & Maid of Honor" },
+      { name: "Beige / Cream", hex: "#F0D2B6", wear: "Fathers, groomsmen, male guests, ninongs, ring bearers & long-sleeved inner shirts" },
+      { name: "Muted Gold",    hex: "#DBB082", wear: "Mother of the Bride" },
+      { name: "Taupe",         hex: "#B59580", wear: "Mother of the Groom & ninangs" },
+      { name: "Mocha",         hex: "#7E5A42", wear: "Female guests (Filipiniana dresses required)" }
     ]
   },
 
@@ -112,7 +110,7 @@ const CONFIG = {
      --------------------------------------------------------------------------- */
   rsvp: {
     deadline: "2027-05-12",
-    email: "rsvp@lydeandprince.com",
+    email: "rsvp@princeandlyde.com",
     endpoint: "",                       // e.g. "https://formspree.io/f/xxxxxxx"
     maxGuests: 5,
     meals: [
@@ -147,34 +145,32 @@ const CONFIG = {
   },
 
   /* ---------------------------------------------------------------------------
-     10. ARTWORK — layered raster art (transparent WebP + gold SVG).
+     10. ARTWORK — the Figma layers, recoloured to the motif (recolor_figma.py).
      Drop your final exports over these exact filenames; no code change needed.
      See ASSETS.md for sizes and where each file is used.
      --------------------------------------------------------------------------- */
   art: {
-    sky:        "assets/bg-sky.webp",
-    hills:      "assets/bg-hills.webp",
-    arch:       "assets/arch-floral.webp",
-    treesLeft:  "assets/trees-cypress-left.webp",
-    treesRight: "assets/trees-cypress-right.webp",
-    cornerTL:   "assets/florals-corner-tl.webp",
-    cornerTR:   "assets/florals-corner-tr.webp",
-    cornerBL:   "assets/florals-corner-bl.webp",
-    cornerBR:   "assets/florals-corner-br.webp",
-    petals:     "assets/petals-sprite.webp",
-    envelope:   "assets/envelope-texture.webp",
-    seal:       "assets/wax-seal.webp",
-    ribbon:     "assets/ribbon-bow.webp",
-    paper:      "assets/paper-card.webp",
-    monogram:   "assets/monogram-gold.svg"
+    paper:       "assets/fig-paper.webp",         // embossed floral paper (envelope + page sides)
+    flap:        "assets/fig-flap.webp",          // sealed envelope flap
+    flapFolded:  "assets/fig-flap-folded.webp",   // flap folded back once opened
+    pocket:      "assets/fig-pocket.webp",        // V-notch envelope pocket
+    lining:      "assets/fig-lining.webp",        // gate illustration inside the envelope
+    gate:        "assets/fig-gate.webp",          // bow-covered reveal backdrop
+    rings:       "assets/rings.webp",             // wedding rings on the reveal screen
+    couple:      "assets/couple-silhouette.webp", // barong + baro't saya silhouette (dress code)
+    arch:        "assets/fig-arch.webp",          // invitation hero arch + staircase
+    boat:        "assets/fig-boat.webp",          // "The Celebration" illustration
+    canopy:      "assets/fig-canopy.webp",        // "Wedding Details" silk canopy
+    petals:      "assets/petals-sprite.webp"      // drifting petals (4 frames in a row)
   },
+
 
   /* ---------------------------------------------------------------------------
      11. SHARE PREVIEW (shown when the link is pasted in a chat app)
      --------------------------------------------------------------------------- */
   share: {
-    title: "Lyde & Prince — We're getting married",
-    description: "Together with their families, Lyde & Prince request the pleasure of your company. Tap the seal to open the invitation.",
+    title: "Prince & Lyde — We're getting married",
+    description: "Together with their families, Prince & Lyde request the pleasure of your company. Tap the seal to open the invitation.",
     image: "assets/og-image.svg"   // ideally export this to a 1200×630 .jpg
   },
 
@@ -182,20 +178,17 @@ const CONFIG = {
      12. COLOURS  — the whole palette; tweak to taste
      --------------------------------------------------------------------------- */
   colors: {
-    blushLight: "#F8DDE0",
-    blushMid:   "#F3C9CF",
-    blushDeep:  "#EDB9C2",
-    paper:      "#FCF2F1",
-    mauve:      "#C9A3AC",
-    mauveDeep:  "#A97F8B",
-    lavender:   "#CDBFE0",
-    sky:        "#DCD3EC",
-    sage:       "#9FB39A",
-    cypress:    "#6E8570",
-    gold:       "#D8B26A",
-    goldLight:  "#F0DCA8",
-    plum:       "#4A3A45"
+    champagne: "#F5CAA5",
+    beige:     "#F0D2B6",
+    gold:      "#DBB082",   // muted gold
+    taupe:     "#B59580",
+    mocha:     "#7E5A42",   // headings, script lettering
+    ink:       "#5E4434",   // body text
+    page:      "#F3DEC8",   // section background
+    cream:     "#FBF4EC",   // cards, lettering over artwork
+    chip:      "#FAEEE2"    // buttons, sound control
   }
+
 };
 
 /* ---------------------------------------------------------------------------

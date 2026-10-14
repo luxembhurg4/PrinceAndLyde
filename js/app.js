@@ -1,5 +1,5 @@
 /* =============================================================================
-   LYDE & PRINCE · WEDDING INVITATION
+   PRINCE & LYDE · WEDDING INVITATION
    app.js — intro animation, scroll effects, countdown, gallery, RSVP, music.
    All editable content lives in js/config.js.
    ========================================================================== */
@@ -23,11 +23,7 @@
     $$(`[data-f="${key}"]`).forEach((el) => (el.textContent = value));
 
   const when = new Date(EVENT.iso);
-  const dateParts = {
-    weekday:   when.toLocaleDateString(undefined, { weekday: "long" }),
-    day:       String(when.getDate()),
-    monthYear: `${when.toLocaleDateString(undefined, { month: "long" })} ${when.getFullYear()}`
-  };
+  const month = when.toLocaleDateString(undefined, { month: "long" });
   const spokenDate = when.toLocaleDateString(undefined, {
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   });
@@ -35,9 +31,12 @@
   bindText("partner1", COUPLE.partner1);
   bindText("partner2", COUPLE.partner2);
   bindText("coupleNames", NAMES);
-  bindText("weekday", dateParts.weekday);
-  bindText("day", dateParts.day);
-  bindText("monthYear", dateParts.monthYear);
+  bindText("weekday", when.toLocaleDateString(undefined, { weekday: "long" }));
+  bindText("day", String(when.getDate()));
+  bindText("month", month);
+  bindText("year", String(when.getFullYear()));
+  bindText("fullDate", `${when.getDate()} ${month} ${when.getFullYear()}`);
+  bindText("ceremonyTime", when.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }));
   bindText("timeLabel", EVENT.timeLabel);
   bindText("parentsLabel", COUPLE.parentsLabel);
   bindText("dateLine", `${spokenDate} · ${CONFIG.venues.ceremony.name}`);
@@ -66,19 +65,9 @@
   $("#dirCeremony").href = dirUrl(CONFIG.venues.ceremony);
   $("#dirReception").href = dirUrl(CONFIG.venues.reception);
 
-  /* monogram (arch crest + wax seal) */
-  const i1 = (COUPLE.monogram[0] || "").trim();
-  const i2 = (COUPLE.monogram[1] || i1).trim();
-  $("#monoA").textContent = i1;
-  $("#monoB").textContent = i2;
-  $("#monoJoin").textContent = COUPLE.monogramJoiner;
-  const sealMono = $("#sealMono");
-  sealMono.innerHTML = "";
-  sealMono.append(document.createTextNode(i1));
-  const amp = document.createElement("span");
-  amp.className = "seal__amp";
-  amp.textContent = COUPLE.monogramJoiner || " ";
-  sealMono.append(amp, document.createTextNode(i2));
+  /* monogram: two overlapping script initials (wax seal + invitation hero) */
+  bindText("monoA", (COUPLE.monogram[0] || "").trim());
+  bindText("monoB", (COUPLE.monogram[1] || COUPLE.monogram[0] || "").trim());
 
   /* parents / sponsors */
   if (COUPLE.parents && COUPLE.parents.length) {
@@ -104,15 +93,15 @@
     timeline.append(li);
   });
 
-  /* dress-code swatches */
+  /* dress-code swatches: colour, name, who wears it */
   const swatchList = $("#swatches");
   CONFIG.dressCode.palette.forEach((c) => {
     const li = document.createElement("li");
     li.className = "swatch";
-    li.innerHTML = `<span class="swatch__dot"></span><span class="swatch__name"></span><span class="swatch__hex"></span>`;
+    li.innerHTML = `<span class="swatch__dot"></span><span class="swatch__name"></span><span class="swatch__wear"></span>`;
     $(".swatch__dot", li).style.background = c.hex;
     $(".swatch__name", li).textContent = c.name;
-    $(".swatch__hex", li).textContent = c.hex.toUpperCase();
+    $(".swatch__wear", li).textContent = c.wear || "";
     swatchList.append(li);
   });
 
@@ -144,6 +133,8 @@
     ].filter(Boolean).join("\n");
     return `mailto:${CONFIG.rsvp.email}?subject=${encodeURIComponent("RSVP — " + NAMES)}&body=${encodeURIComponent(body)}`;
   };
+  /* "Write to us instead" carries whatever the guest has typed so far */
+  $("#mailtoLink").addEventListener("click", (e) => { e.currentTarget.href = buildMailto($("#rsvpForm")); });
 
   /* gift link */
   if (CONFIG.gift.linkUrl) {
@@ -159,8 +150,9 @@
   const guest = new URLSearchParams(location.search).get("guest");
   if (guest) {
     const safe = guest.replace(/[<>]/g, "").slice(0, 60);
-    $("#greeting").textContent = `Dear ${safe}`;
-    $("#greetingKicker").textContent = "A wedding invitation, just for you";
+    const greeting = $("#greeting");
+    greeting.textContent = `Dear ${safe},`;
+    greeting.hidden = false;
     const hello = $("#rsvpHello");
     hello.textContent = `Dear ${safe},`;
     hello.hidden = false;
@@ -168,17 +160,26 @@
   }
 
   /* =========================================================================
-     3 · ENVELOPE INTRO
+     3 · ENVELOPE INTRO  (timings follow the Figma "Continuous motion" frame)
+     tap → seal pressed → flap hinges open, lining + pocket rise → envelope
+     slides up while the bow screen rises → bow words fade in one by one
      ====================================================================== */
   const intro = $("#intro");
-  const scene = $("#scene");
+  const bow = $("#reveal");
+  const stage = $("#stage");
   const sealBtn = $("#sealBtn");
+  const OPEN = 250, LEAVE = OPEN + 3900, DONE = LEAVE + 1600;
   let opened = false;
   let timers = [];
+
+  document.body.classList.add("is-entering");   // bow screen waits below the envelope
+  /* decode the hidden layers now so the first frame of the opening isn't blank */
+  $$("#intro img, .stage__art").forEach((img) => img.decode && img.decode().catch(() => {}));
 
   function afterIntro() {
     intro.classList.add("is-gone");
     document.body.classList.remove("is-locked");
+    document.body.classList.add("is-ready");
     window.removeEventListener("touchmove", blockScroll, { passive: false });
     window.removeEventListener("wheel", blockScroll, { passive: false });
     const page = $("#page");
@@ -192,34 +193,28 @@
     if (opened) return;
     opened = true;
     sealBtn.classList.add("is-pressed");
-    $("#tapHint").style.opacity = "0";
 
     if (reduced) {                       // no cinematic sequence needed
-      scene.classList.add("is-open", "is-revealed");
-      timers.push(setTimeout(afterIntro, 350));
+      skipIntro();
       return;
     }
-
-    timers.push(setTimeout(() => intro.classList.add("is-opening"), 600));    // ribbon loosens, flap peels
-    timers.push(setTimeout(() => {                                            // envelope dissolves, curtains part
-      intro.classList.add("is-dissolving");
-      scene.classList.add("is-open");
-    }, 1400));
-    timers.push(setTimeout(() => scene.classList.add("is-revealed"), 2600)); // monogram appears
-    timers.push(setTimeout(afterIntro, 3800));                                // hand over to the page
+    timers.push(setTimeout(() => intro.classList.add("is-open"), OPEN));
+    timers.push(setTimeout(() => {
+      intro.classList.add("is-leaving");
+      document.body.classList.remove("is-entering");
+    }, LEAVE));
+    timers.push(setTimeout(() => bow.classList.add("is-shown"), LEAVE + 1100));
+    timers.push(setTimeout(afterIntro, DONE));
   }
 
   function skipIntro() {
     timers.forEach(clearTimeout);
     timers = [];
-    intro.classList.add("is-opening", "is-dissolving", "is-gone");
-    scene.classList.add("is-open", "is-revealed");
-    const cl = $("#curtainL");
-    const cr = $("#curtainR");
-    if (cl) cl.style.display = "none";
-    if (cr) cr.style.display = "none";
+    stage.style.transition = "none";
+    document.body.classList.remove("is-entering");
+    bow.classList.add("is-shown");
     afterIntro();
-    $$(".reveal").forEach((el) => el.classList.add("is-in"));
+    requestAnimationFrame(() => (stage.style.transition = ""));
   }
 
   function blockScroll(e) {
@@ -234,20 +229,10 @@
   if (new URLSearchParams(location.search).has("skip")) {
     skipIntro();
   }
-  const scrollParam = new URLSearchParams(location.search).get("scroll");
-  if (scrollParam) {
-    document.body.classList.remove("is-locked");
-    document.documentElement.style.scrollBehavior = "auto";
-    window.scrollTo(0, parseInt(scrollParam, 10));
-    document.documentElement.scrollTop = parseInt(scrollParam, 10);
-    document.body.scrollTop = parseInt(scrollParam, 10);
-  }
 
   /* =========================================================================
-     4 · SCROLL REVEALS + PARALLAX
+     4 · SCROLL REVEALS
      ====================================================================== */
-  let parallaxLayers = [];
-
   function initObservers() {
     /* fade elements in as they arrive */
     const io = new IntersectionObserver(
@@ -257,6 +242,10 @@
       { threshold: 0.14, rootMargin: "0px 0px -6% 0px" }
     );
     $$(".reveal").forEach((el) => io.observe(el));
+
+    /* pinned backdrop: the gate crossfades to the arch as the invitation scrolls in */
+    new IntersectionObserver(([e]) => stage.classList.toggle("is-hero", e.isIntersecting),
+      { threshold: 0.45 }).observe($("#invitation"));
 
     /* lazy-load the map when it nears the viewport */
     const map = $("#mapFrame");
@@ -269,53 +258,7 @@
         });
       }, { rootMargin: "300px" }).observe(map);
     }
-
-    parallaxLayers = $$(".lyr[data-speed]").map((el) => ({
-      el,
-      speed: parseFloat(el.dataset.speed) || 0,
-      depth: parseFloat(el.dataset.depth) || 1
-    }));
   }
-
-  /* gentle depth: layers drift at different rates while the scene is pinned,
-     plus a subtle pointer/tilt shift for atmosphere (skipped under reduced motion) */
-  let ticking = false;
-  let tiltX = 0, tiltY = 0;
-  function onScroll() {
-    if (ticking || reduced || !parallaxLayers.length) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const y = Math.min(window.scrollY, 900);   // cap so no layer ever exposes an edge
-      parallaxLayers.forEach(({ el, speed, depth }) => {
-        const sy = (y * speed) / 600;
-        el.style.transform =
-          `translate3d(${(tiltX * depth).toFixed(2)}px, ${(sy + tiltY * depth).toFixed(2)}px, 0)`;
-      });
-      ticking = false;
-    });
-  }
-  window.addEventListener("scroll", onScroll, { passive: true });
-
-  function setTilt(nx, ny) {   // nx, ny in [-1, 1]
-    tiltX = nx * 10;
-    tiltY = ny * 7;
-    onScroll();
-  }
-  if (!reduced) {
-    window.addEventListener("pointermove", (e) => {
-      setTilt((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
-    }, { passive: true });
-    window.addEventListener("deviceorientation", (e) => {
-      if (e.gamma == null || e.beta == null) return;
-      setTilt(Math.max(-1, Math.min(1, e.gamma / 30)), Math.max(-1, Math.min(1, (e.beta - 45) / 30)));
-    }, { passive: true });
-  }
-
-  /* retire the "scroll" cue as soon as the guest starts moving */
-  const sceneCue = $("#sceneCue");
-  window.addEventListener("scroll", () => {
-    sceneCue.classList.toggle("is-hidden", window.scrollY > 60);
-  }, { passive: true });
 
   /* =========================================================================
      5 · COUNTDOWN
@@ -550,7 +493,7 @@
   /* =========================================================================
      9 · MUSIC  (never autoplays; falls back to a soft generated pad)
      ====================================================================== */
-  const musicBtn = $("#musicBtn"), musicLabel = $("#musicLabel"), audio = $("#musicAudio");
+  const musicBtn = $("#musicBtn"), audio = $("#musicAudio");
   let playing = false, ctx = null, master = null, voices = [];
 
   function buildPad() {
@@ -585,7 +528,6 @@
   musicBtn.addEventListener("click", async () => {
     playing = !playing;
     musicBtn.setAttribute("aria-pressed", String(playing));
-    musicLabel.textContent = playing ? "Music on" : "Music off";
     musicBtn.setAttribute("aria-label", playing ? "Pause music" : "Play music");
 
     if (CONFIG.music.src) {                       // real track supplied
@@ -615,7 +557,7 @@
     let spriteOk = false;
     sprite.onload = () => { spriteOk = true; };
     sprite.onerror = () => { spriteOk = false; };
-    const TINTS = ["rgba(255,253,251,", "rgba(243,201,207,", "rgba(205,191,224,", "rgba(228,201,138,"];
+    const TINTS = ["rgba(251,244,236,", "rgba(245,202,165,", "rgba(240,210,182,", "rgba(219,176,130,"];
     let w = 0, h = 0, dpr = 1, petals = [];
 
     function resize() {

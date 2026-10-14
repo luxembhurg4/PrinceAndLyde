@@ -1,12 +1,13 @@
-# Lyde & Prince — Digital Envelope Wedding Invitation
+# Prince & Lyde — Digital Envelope Wedding Invitation
 
-A mobile-first, scroll-driven wedding invitation site. A blush-pink envelope with a
-champagne wax seal opens to an illustrated garden scene, then flows into a sequence of
-stationery-style pages (invitation → countdown → venue → programme → dress code →
-gallery → RSVP → gifts → closing).
+A mobile-first, scroll-driven wedding invitation site, built from the Figma design and
+recoloured to the motif (champagne · beige · muted gold · taupe · mocha). An embossed
+envelope with a wax seal opens onto a rose-arch gate with the wedding rings, then flows
+into the invitation → countdown & celebration → wedding details → programme → dress
+code → gallery → RSVP → gifts → closing.
 
-Everything is original, hand-drawn SVG + CSS animation, so the whole site loads in a
-few hundred kilobytes — no video, no heavy frameworks, no build step.
+Raster artwork + CSS animation, about 1 MB in total — no video, no heavy frameworks,
+no build step.
 
 ---
 
@@ -43,14 +44,13 @@ immediately after a refresh.
 | Gift / registry note and link | `gift` |
 | Background music file | `music` |
 | Share title, description, preview image | `share` |
-| Whole palette (blush, sage, gold, plum…) | `colors` |
+| Whole palette (champagne, beige, gold, taupe, mocha…) | `colors` |
 
 **Date format** — write `event.iso` as `YYYY-MM-DDTHH:MM:SS` (no `Z` at the end).
 It drives the printed date *and* the countdown.
 
-**Monogram** — `monogram: "LP"` uses the first letter of each name's side; write
-`monogram: ["A","B"]`-style text like `"AB"` for two letters, or change
-`monogramJoiner` to `""` if you do not want the ampersand.
+**Monogram** — `monogram: "PL"`: the two letters are pressed into the wax seal and drawn
+overlapping in script above the names on the invitation.
 
 ---
 
@@ -82,9 +82,9 @@ music: { src: "assets/music/suite.mp3", volume: 0.35, label: "Play music" }
 Leave `src: ""` and the site plays a soft, generated harp-like pad instead (no file
 needed). Music **never** starts by itself — only after the guest taps the note button.
 
-### The scene, arch, venue artwork
-The garden scene is layered **raster art** in `assets/` (WebP + one gold SVG).
-To restyle it, replace the files — never edit code. Full filename/size/usage
+### The envelope, gate, arch and canopy artwork
+The artwork is the Figma layers in `assets/` (`fig-*.webp` + small SVGs), recoloured
+to the motif by `recolor_figma.py`. To restyle it, replace the files — never edit code. Full filename/size/usage
 table: see **`ASSETS.md`** (also `config.js → art`).
 
 ---
@@ -152,18 +152,18 @@ the top of `index.html`.
 
 ## 7 · What is built in
 
-- **Envelope intro** — tap the wax seal: it presses and glows, the ribbon loosens,
-  the flap peels open, fabric curtains part and the garden gently zooms in.
-- **Scroll experience** — sticky scene, parallax layers, fade-up reveals, drifting
+- **Envelope intro** — tap the wax seal: the flap folds back, the gate lining and pocket
+  settle in, then the envelope slides away and the bow screen rises with the names.
+- **Scroll experience** — full-screen invitation art, staggered fade-up reveals, drifting
   petals.
 - **Countdown** to the ceremony, live to the second.
 - **Add to calendar** (`.ics` download + Google Calendar) and a **Share** button.
-- **Venue** with an illustrated header, embedded map (loads lazily) and
-  *Get Directions* links.
+- **Wedding details** under a silk canopy, embedded map (loads lazily) and
+  *View on map* links for the ceremony and the celebration.
 - **Gallery** — swipeable strip with dots, arrows and a full-screen lightbox
   (swipe, arrow keys, Esc).
 - **RSVP** — validation, graceful confirmation, optional meal choice and guest count.
-- **Music toggle** — bottom corner, off until tapped, pauses when the tab is hidden.
+- **Sound button** — bottom corner, off until tapped, pauses when the tab is hidden.
 - **Accessibility** — large tap targets, visible focus rings, alt text, `prefers-reduced-motion`
   support (animation and petals are switched off, the intro opens instantly), and a
   *Skip* button for the intro.
@@ -175,12 +175,12 @@ the top of `index.html`.
 
 - **Colours** — `config.js → colors` (they are injected as CSS variables named `--c-*`).
 - **Fonts** — the two Google Fonts are linked at the top of `index.html`:
-  *Parisienne* (script) and *Cormorant Garamond* (serif). Swap the link and the
-  `--script` / `--serif` variables in `css/style.css`.
-- **Animation speed** — timings live in `css/style.css` transitions and in the
-  `setTimeout` values in `js/app.js → openEnvelope()` (in milliseconds).
-- **Desktop look** — side scenery and the centred 600 px “stage” column are controlled
-  by the `@media (min-width:760px)` / `(min-width:900px)` blocks in `style.css`.
+  *Pinyon Script* (names, headings), *Cinzel* (capitals) and *Cormorant Garamond* (text).
+  Swap the link and the `--script` / `--caps` / `--serif` variables in `css/style.css`.
+- **Animation speed** — timings live in `css/style.css` transitions and in
+  `OPEN` / `LEAVE` / `DONE` in `js/app.js` (milliseconds).
+- **Desktop look** — the site stays a phone-width column (`--col`, max 480 px, in
+  `style.css`) centred on the embossed paper; every Figma measurement scales with it.
 
 ---
 
