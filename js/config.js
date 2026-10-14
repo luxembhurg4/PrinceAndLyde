@@ -136,13 +136,16 @@ const CONFIG = {
      9. BACKGROUND MUSIC
      src → an .mp3/.ogg in  assets/music/  (e.g. "assets/music/suite.mp3").
            Leave "" and the site plays a soft generated harp-like pad instead.
-           Music NEVER starts on its own — only after the guest taps the toggle.
+           Browsers only allow sound after a tap, so it starts when the guest taps
+           the wax seal (or Skip); the round sound button turns it off and on.
+     volume → 0 to 1 (0.5 = half volume)
      --------------------------------------------------------------------------- */
   music: {
-    src: "",
-    volume: 0.35,
+    src: "assets/music/Calum Scott - Biblical Cello Cover [TLQ_ppq2q0c].mp3",
+    volume: 0.5,
     label: "Play music"
   },
+
 
   /* ---------------------------------------------------------------------------
      10. ARTWORK — the Figma layers, recoloured to the motif (recolor_figma.py).

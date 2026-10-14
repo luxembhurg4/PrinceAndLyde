@@ -47,9 +47,10 @@ Timings follow the Figma "Continuous motion" frame:
    words scroll over it, and the gate crossfades to the arch as the invitation arrives.
 5. Everything below fades up as it scrolls into view (`.reveal`, delay per element via `--d`).
 
-A finger or cursor leaves a petal trail (`.trail`, `js/app.js` → petal trail): rosebuds laid along the
-stroke and loose petals flung off it, tumbling as they fall. Faster/longer strokes and firmer presses
-(where the device reports force) make it denser and wider; a tap bursts petals. Capped at 100 on screen.
+A finger or cursor leaves a petal trail (`.trail`, `js/app.js` → petal trail): petals (and the odd rosebud) scattered along
+the stroke and loose petals flung off it, tumbling as they fall. Faster/longer strokes and firmer presses
+(where the device reports force) make it denser and wider; a tap bursts petals. Sizes 8–34 px (mostly
+small), fades in ~1 s, capped at 60 on screen.
 
 `prefers-reduced-motion`: the envelope opens instantly, no petals, no petal trail, no fades.
 

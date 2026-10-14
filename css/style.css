@@ -525,16 +525,16 @@ body.is-ready .music{ opacity:1; pointer-events:auto; }
   background:url("../assets/petal-trail.webp") 0 0 / 1200% 100% no-repeat;
   background-position-x:calc(var(--f) * 100% / 11);
   will-change:transform, opacity;
-  animation:petalFly var(--life) cubic-bezier(.2,.6,.35,1) forwards;
+  animation:petalFly var(--life) cubic-bezier(.25,.6,.4,1) forwards;
 }
 @keyframes petalFly{
   0%  { opacity:0;
         transform:translate(-50%,-50%) perspective(300px) rotate(var(--a)) scale(.35); }
-  10% { opacity:1; }
+  10% { opacity:var(--o); }
   40% { transform:translate(calc(-50% + var(--dx) * .7), calc(-50% + var(--dy)))
                   perspective(300px) rotate(calc(var(--a) + var(--rz) * .4))
                   rotateX(calc(var(--rx) * .4)) rotateY(calc(var(--ry) * .4)) scale(1); }
-  75% { opacity:.9; }
+  60% { opacity:var(--o); }
   100%{ opacity:0;
         transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + var(--fall)))
                   perspective(300px) rotate(calc(var(--a) + var(--rz)))

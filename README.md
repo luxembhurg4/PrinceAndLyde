@@ -80,7 +80,8 @@ music: { src: "assets/music/suite.mp3", volume: 0.35, label: "Play music" }
 ```
 
 Leave `src: ""` and the site plays a soft, generated harp-like pad instead (no file
-needed). Music **never** starts by itself — only after the guest taps the note button.
+needed). Browsers only allow sound after a tap, so the music starts when the guest taps
+the wax seal (or Skip); the round sound button turns it off and on.
 
 ### The envelope, gate, arch and canopy artwork
 The artwork is the Figma layers in `assets/` (`fig-*.webp` + small SVGs), recoloured
@@ -163,7 +164,8 @@ the top of `index.html`.
 - **Gallery** — swipeable strip with dots, arrows and a full-screen lightbox
   (swipe, arrow keys, Esc).
 - **RSVP** — validation, graceful confirmation, optional meal choice and guest count.
-- **Sound button** — bottom corner, off until tapped, pauses when the tab is hidden.
+- **Music** — starts with the seal tap at half volume (`music.volume`); the round sound
+  button turns it off/on, and it pauses when the tab is hidden.
 - **Accessibility** — large tap targets, visible focus rings, alt text, `prefers-reduced-motion`
   support (animation and petals are switched off, the intro opens instantly), and a
   *Skip* button for the intro.

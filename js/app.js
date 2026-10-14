@@ -193,6 +193,7 @@
     if (opened) return;
     opened = true;
     sealBtn.classList.add("is-pressed");
+    setMusic(true);                      // the seal tap is the gesture browsers require for sound
 
     if (reduced) {                       // no cinematic sequence needed
       skipIntro();
@@ -218,7 +219,7 @@
   }
 
   sealBtn.addEventListener("click", openEnvelope);
-  $("#skipIntro").addEventListener("click", skipIntro);
+  $("#skipIntro").addEventListener("click", () => { skipIntro(); setMusic(true); });
   window.addEventListener("touchmove", blockScroll, { passive: false });
   window.addEventListener("wheel", blockScroll, { passive: false });
   if (new URLSearchParams(location.search).has("skip")) {
@@ -486,7 +487,7 @@
   });
 
   /* =========================================================================
-     9 · MUSIC  (never autoplays; falls back to a soft generated pad)
+     9 · MUSIC  (starts on the seal / Skip tap; falls back to a soft generated pad)
      ====================================================================== */
   const musicBtn = $("#musicBtn"), audio = $("#musicAudio");
   let playing = false, ctx = null, master = null, voices = [];
@@ -520,15 +521,16 @@
     });
   }
 
-  musicBtn.addEventListener("click", async () => {
-    playing = !playing;
-    musicBtn.setAttribute("aria-pressed", String(playing));
-    musicBtn.setAttribute("aria-label", playing ? "Pause music" : "Play music");
+  async function setMusic(on) {
+    playing = on;
+    musicBtn.setAttribute("aria-pressed", String(on));
+    musicBtn.setAttribute("aria-label", on ? "Pause music" : "Play music");
 
     if (CONFIG.music.src) {                       // real track supplied
       if (!audio.src) audio.src = CONFIG.music.src;
       audio.volume = CONFIG.music.volume;
-      playing ? audio.play().catch(() => {}) : audio.pause();
+      if (on) audio.play().catch(() => setMusic(false));   // blocked → show the button as off
+      else audio.pause();
       return;
     }
     if (!ctx) buildPad();                          // generated ambience
@@ -536,7 +538,8 @@
     const t = ctx.currentTime;
     master.gain.cancelScheduledValues(t);
     master.gain.linearRampToValueAtTime(playing ? CONFIG.music.volume * 0.5 : 0, t + 1.6);
-  });
+  }
+  musicBtn.addEventListener("click", () => setMusic(!playing));
 
   /* =========================================================================
      10 · DRIFTING PETALS
@@ -624,9 +627,10 @@
      a firmer press (touch force / pen pressure) adds more, taps burst.
      ====================================================================== */
   if (!reduced) {
-    const MAX_LIVE = 100;
+    const MAX_LIVE = 60;
     let live = 0, last = null, carry = 0;
     const rand = (a, b) => a + Math.random() * (b - a);
+    const skewSmall = (min, max) => min + Math.pow(Math.random(), 1.8) * (max - min);   // mostly small, a few large
 
     function spawn(x, y, o) {
       if (live >= MAX_LIVE) return;
@@ -636,26 +640,32 @@
       el.style.cssText =
         `left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;--s:${o.size.toFixed(1)}px;--f:${o.frame};` +
         `--a:${o.angle | 0}deg;--dx:${o.dx.toFixed(1)}px;--dy:${o.dy.toFixed(1)}px;--fall:${o.fall.toFixed(1)}px;` +
-        `--rz:${o.rz | 0}deg;--rx:${o.rx | 0}deg;--ry:${o.ry | 0}deg;--life:${o.life | 0}ms`;
+        `--rz:${o.rz | 0}deg;--rx:${o.rx | 0}deg;--ry:${o.ry | 0}deg;--o:${rand(0.65, 1).toFixed(2)};--life:${o.life | 0}ms`;
       el.addEventListener("animationend", () => { el.remove(); live--; });
       document.body.append(el);
     }
 
-    /* a bud resting on the stroke, aligned to its direction */
-    const bud = (x, y, dir, k) => spawn(x + rand(-4, 4), y + rand(-4, 4), {
-      frame: 8 + ((Math.random() * 4) | 0), size: rand(18, 26) * (0.85 + k * 0.15),
-      angle: dir + 90 + rand(-25, 25), dx: rand(-6, 6), dy: rand(-2, 6), fall: rand(10, 24),
-      rz: rand(-30, 30), rx: rand(-20, 20), ry: rand(-20, 20), life: rand(1500, 2100)
+    /* an occasional rosebud resting on the stroke, aligned to its direction */
+    const bud = (x, y, dir) => spawn(x + rand(-5, 5), y + rand(-5, 5), {
+      frame: 8 + ((Math.random() * 4) | 0), size: skewSmall(13, 28),
+      angle: dir + 90 + rand(-30, 30), dx: rand(-6, 6), dy: rand(-2, 6), fall: rand(8, 18),
+      rz: rand(-30, 30), rx: rand(-20, 20), ry: rand(-20, 20), life: rand(650, 1000)
+    });
+    /* a petal settling on the stroke itself */
+    const pathPetal = (x, y) => spawn(x + rand(-8, 8), y + rand(-8, 8), {
+      frame: (Math.random() * 8) | 0, size: skewSmall(8, 30),
+      angle: rand(0, 360), dx: rand(-10, 10), dy: rand(-4, 8), fall: rand(14, 34),
+      rz: rand(-90, 90), rx: rand(-120, 120), ry: rand(-120, 120), life: rand(700, 1050)
     });
     /* a loose petal flung off the stroke, tumbling as it falls */
     const petal = (x, y, dir, k) => {
       const throwAngle = (dir + (Math.random() < 0.5 ? 90 : -90) + rand(-50, 50)) * Math.PI / 180;
-      const reach = rand(14, 46) * k;
+      const reach = rand(12, 40) * k;
       spawn(x, y, {
-        frame: (Math.random() * 8) | 0, size: rand(12, 22) * (0.8 + k * 0.2),
+        frame: (Math.random() * 8) | 0, size: skewSmall(8, 34),
         angle: rand(0, 360), dx: Math.cos(throwAngle) * reach, dy: Math.sin(throwAngle) * reach * 0.6,
-        fall: rand(40, 110), rz: rand(-260, 260), rx: rand(-320, 320), ry: rand(-320, 320),
-        life: rand(1800, 2800)
+        fall: rand(30, 70), rz: rand(-260, 260), rx: rand(-320, 320), ry: rand(-320, 320),
+        life: rand(900, 1400)
       });
     };
 
@@ -665,23 +675,23 @@
       const dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
       if (d < 2) return;
       const speed = d / Math.max(16, t - last.t);                    // px per ms
-      const k = Math.min(2.6, Math.max(0.35, speed / 0.5)) * (0.6 + pressure);
+      const k = Math.min(2.4, Math.max(0.35, speed / 0.6)) * (0.6 + pressure);
       const dir = Math.atan2(dy, dx) * 180 / Math.PI;
-      const step = 22 / Math.min(2, k);                              // denser buds when stronger
+      const step = 30 / Math.sqrt(Math.min(2, k));                   // sparser when gentle
       carry += d;
-      while (carry >= step) {                                        // lay buds along the path
+      while (carry >= step) {                                        // light scatter along the path
         carry -= step;
-        const f = 1 - carry / d;
-        bud(last.x + dx * f, last.y + dy * f, dir, k);
+        const f = 1 - carry / d, px = last.x + dx * f, py = last.y + dy * f;
+        if (Math.random() < 0.18) bud(px, py, dir); else pathPetal(px, py);
       }
-      const loose = Math.round(k * rand(0.6, 1.8));                  // throw petals off it
-      for (let i = 0; i < loose; i++) petal(x, y, dir, k);
+      if (Math.random() < 0.3 * k) petal(x, y, dir, k);              // a few flung off, more when stronger
+      if (k > 1.6 && Math.random() < 0.4) petal(x, y, dir, k);
       last = { x, y, t };
     }
     function burst(x, y, pressure) {                                 // a tap / press
-      const n = 5 + Math.round(pressure * 8);
-      for (let i = 0; i < n; i++) petal(x, y, rand(0, 360), 0.8 + pressure);
-      bud(x, y, rand(0, 360), 1);
+      const n = 3 + Math.round(pressure * 6);
+      for (let i = 0; i < n; i++) petal(x, y, rand(0, 360), 0.7 + pressure);
+      if (Math.random() < 0.5) bud(x, y, rand(0, 360));
       last = null; carry = 0;
     }
     const force = (p) => (p > 0 && p !== 0.5 ? p : 0.5);              // 0.5 = "unknown" on most devices
@@ -708,7 +718,8 @@
 
   /* pause the audio when the tab is hidden */
   document.addEventListener("visibilitychange", () => {
-    if (!ctx || !playing) return;
-    document.hidden ? ctx.suspend() : ctx.resume();
+    if (!playing) return;
+    if (CONFIG.music.src) { document.hidden ? audio.pause() : audio.play().catch(() => {}); return; }
+    if (ctx) document.hidden ? ctx.suspend() : ctx.resume();
   });
 })();
